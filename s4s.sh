@@ -3,7 +3,8 @@
 # include parse_yaml function
 APPDIR=`dirname $0`
 
-
+# YAML parser from:
+# https://gist.github.com/pkuczynski/8665367
 parse_yaml() {
    local prefix=$2
    local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')

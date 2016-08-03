@@ -9,7 +9,7 @@ global:
 host1:
   name: a.dddd.com
   user: root
-  dirs: /home/ /var/www/html//
+  dirs: /home/ /var/www/html/
   
 host2:
   name: d.dddd.com
