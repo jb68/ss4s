@@ -25,17 +25,11 @@ parse_yaml() {
 # load config
 eval $(parse_yaml $APPDIR/config.yml "conf_")
 
-# access yaml content
-echo $conf_host1
-#comm -3 <(declare | sort) <(declare -f | sort)
-
 # Backup directory
 DEST=$conf_global_destDir
 # rsync path
 LOCAL_RSYNC=$conf_global_rsyncLocal
 REMOTE_RSYNC=$conf_global_rsyncRemote
-
-
 DAYS=$conf_global_retDays
 WEEKS=$conf_global_retWeeks
 MONTHS=$conf_global_retMonths
@@ -72,7 +66,7 @@ do
     DOM=$(date +%e)
     # current day of month
     [ $DOM -eq 3 ] && ROTATEMONTH=1 || ROTATEMONTH=0
-    
+
     echo "ROW=$ROTATEWEEK ROM=$ROTATEMONTH"
     rm -rf $DEST/$HOST/month.$MONTHS
     if [ $ROTATEMONTH -eq 1 ] && [ -d $DEST/$HOST/week.$WEEKS ]; then
@@ -92,8 +86,7 @@ do
         echo "remove week.$WEEKS"
         rm -rf $DEST/$HOST/week.$WEEKS
     fi
-    
-    
+
     if [ $ROTATEWEEK -eq 1 ]; then
         for (( j=$WEEKS; $j>0; j=$j-1 )) do
             ND=$((j-1))
@@ -102,7 +95,7 @@ do
                 mv -f $DEST/$HOST/week.$ND $DEST/$HOST/week.$j
             fi
          done
-    
+
         if [ -d $DEST/$HOST/day.$DAYS ]; then
            echo "day.$DAYS --> week.0"
            mv $DEST/$HOST/day.$DAYS $DEST/$HOST/week.0
@@ -110,10 +103,9 @@ do
     else
         echo "remove day.$DAYS"
         rm -rf $DEST/$HOST/day.$DAYS
-    fi 
-    
+    fi
 
-     # days 
+     # days
     for (( j=$DAYS; $j>0; j=$j-1 )) do
         ND=$((j-1))
         if [ -d $DEST/$HOST/day.$ND ]; then
@@ -122,5 +114,4 @@ do
         fi
     done
     mv $DEST/$HOST/rsync.part $DEST/$HOST/day.0
-    
 done
