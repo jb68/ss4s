@@ -1,0 +1,17 @@
+global:
+  retDays: 7
+  retWeeks: 4
+  retMonths: 6
+  destDir: /backups
+  rsyncRemote: /usr/bin/rsync
+  rsyncLocal: /usr/bin/rsync
+
+host1:
+  name: a.dddd.com
+  user: root
+  dirs: /home/ /var/www/html//
+  
+host2:
+  name: d.dddd.com
+  user: root
+  dirs: /home/ /var/www/html/ /var/spool/mail/
