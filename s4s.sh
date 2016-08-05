@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # include parse_yaml function
 APPDIR=`dirname $0`
@@ -36,8 +36,8 @@ MONTHS=$conf_global_retMonths
 echo "Retention Policy (dd/ww/mm) $DAYS/$WEEKS/$MONTHS"
 
 # check structure
-for (( i=($conf_length-1); $i>0; i-- ))
-do
+i=$((conf_length-1))
+while [  $i -gt 0 ]; do
     eval HOST=\$conf_host${i}_name
     eval DIRS=\$conf_host${i}_dirs
     eval SRC=\$conf_host${i}_src
@@ -70,12 +70,15 @@ do
     echo "ROW=$ROTATEWEEK ROM=$ROTATEMONTH"
     rm -rf $DEST/$HOST/month.$MONTHS
     if [ $ROTATEMONTH -eq 1 ] && [ -d $DEST/$HOST/week.$WEEKS ]; then
-        for (( j=$MONTHS; $j>0; j=$j-1 )) do
+
+        j=$MONTHS
+        while [ $j -gt 0 ]; do
             ND=$((j-1))
             if [ -d $DEST/$HOST/month.$ND ]; then
                 echo "month.$ND --> month.$j"
                 mv -f $DEST/$HOST/month.$ND $DEST/$HOST/month.$j
             fi
+            j=$((j-1))
         done
 
         if [ -d $DEST/$HOST/week.$WEEKS ]; then
@@ -88,12 +91,14 @@ do
     fi
 
     if [ $ROTATEWEEK -eq 1 ]; then
-        for (( j=$WEEKS; $j>0; j=$j-1 )) do
+        j=$WEEKS
+        while [ $j -gt 0 ]; do
             ND=$((j-1))
             if [ -d $DEST/$HOST/week.$ND ]; then
                 echo "week.$ND --> week.$j"
                 mv -f $DEST/$HOST/week.$ND $DEST/$HOST/week.$j
             fi
+            j=$((j-1))
          done
 
         if [ -d $DEST/$HOST/day.$DAYS ]; then
@@ -106,12 +111,15 @@ do
     fi
 
      # days
-    for (( j=$DAYS; $j>0; j=$j-1 )) do
+    j=$DAYS
+    while [ $j -gt 0 ]; do
         ND=$((j-1))
         if [ -d $DEST/$HOST/day.$ND ]; then
             echo "day.$ND --> day.$j"
             mv -f $DEST/$HOST/day.$ND $DEST/$HOST/day.$j
         fi
+        j=$((j-1))
     done
     mv $DEST/$HOST/rsync.part $DEST/$HOST/day.0
+i=$((i-1))
 done
