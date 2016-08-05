@@ -1,4 +1,5 @@
 #!/bin/sh
+set -f
 
 # include parse_yaml function
 APPDIR=`dirname $0`
