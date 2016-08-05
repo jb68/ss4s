@@ -1,6 +1,5 @@
 #!/bin/sh
 set -f
-
 # include parse_yaml function
 APPDIR=`dirname $0`
 
@@ -43,8 +42,16 @@ while [  $i -gt 0 ]; do
     eval DIRS=\$conf_host${i}_dirs
     eval SRC=\$conf_host${i}_src
     eval RUSER=\$conf_host${i}_user
+    eval EXCLUDES=\$conf_host${i}_excl
 
     echo "Snapshotting $HOST, dirs: $DIRS"
+    CMDEXCLUDE=''
+    if [ "$EXCLUDES" ]; then
+      for EXCLUDE in $EXCLUDES; do
+        CMDEXCLUDE="$CMDEXCLUDE --exclude=$EXCLUDE"
+      done
+    fi
+    echo "CNDEXCLUDE=$CMDEXCLUDE"
 
     if [ ! -d $DEST/$HOST/rsync.part ]; then
         mkdir -p $DEST/$HOST/rsync.part;
@@ -56,10 +63,12 @@ while [  $i -gt 0 ]; do
     fi
     for DIR in $DIRS; do
         echo "-- Snapshotting $DIR"
-        $LOCAL_RSYNC -ahR --rsync-path=$REMOTE_RSYNC --stats \
+        $LOCAL_RSYNC -ahR --rsync-path=$REMOTE_RSYNC --stats $CMDEXCLUDE \
            --delete $LINK_DEST $RUSER@$HOST:$DIR $DEST/$HOST/rsync.part/
         [ $? -eq 0 ] || ( echo "ERROR $RET" && exit 1 )
+
     done
+    #i=$((i-1)); continue
     echo "--------------- ROtation of $HOST --------"
     # current day of week
     DOW=$(date +%u)
@@ -92,6 +101,7 @@ while [  $i -gt 0 ]; do
     fi
 
     if [ $ROTATEWEEK -eq 1 ]; then
+
         j=$WEEKS
         while [ $j -gt 0 ]; do
             ND=$((j-1))
@@ -111,7 +121,6 @@ while [  $i -gt 0 ]; do
         rm -rf $DEST/$HOST/day.$DAYS
     fi
 
-     # days
     j=$DAYS
     while [ $j -gt 0 ]; do
         ND=$((j-1))

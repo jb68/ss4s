@@ -9,9 +9,11 @@ global:
 host1:
   name: a.dddd.com
   user: root
-  dirs: /home/ /var/www/html/
+  dirs: /home /var/www/html /etc
+  excl: /etc/webmin/system-status/ dovecot.index*
   
 host2:
   name: d.dddd.com
   user: root
-  dirs: /home/ /var/www/html/ /var/spool/mail/
+  dirs: /home /var/www/html /etc /var/spool/mail
+  excl: .*/ /etc/webmin/system-status/
