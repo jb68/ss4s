@@ -2,7 +2,7 @@
 set -f
 # include parse_yaml function
 APPDIR=`dirname $0`
-
+ROTATE=0
 # YAML parser from:
 # https://gist.github.com/pkuczynski/8665367
 parse_yaml() {
@@ -47,9 +47,9 @@ while [  $i -gt 0 ]; do
     echo "Snapshotting $HOST, dirs: $DIRS"
     CMDEXCLUDE=''
     if [ "$EXCLUDES" ]; then
-      for EXCLUDE in $EXCLUDES; do
-        CMDEXCLUDE="$CMDEXCLUDE --exclude=$EXCLUDE"
-      done
+        for EXCLUDE in $EXCLUDES; do
+            CMDEXCLUDE="$CMDEXCLUDE --exclude=$EXCLUDE"
+        done
     fi
     echo "CNDEXCLUDE=$CMDEXCLUDE"
 
@@ -65,11 +65,22 @@ while [  $i -gt 0 ]; do
         echo "-- Snapshotting $DIR"
         $LOCAL_RSYNC -ahR --rsync-path=$REMOTE_RSYNC --stats $CMDEXCLUDE \
            --delete $LINK_DEST $RUSER@$HOST:$DIR $DEST/$HOST/rsync.part/
-        [ $? -eq 0 ] || ( echo "ERROR $RET" && exit 1 )
-
+        [ $? -eq 0 ] || { echo "ERROR, trying next DIR"; ERROR=1; continue; }
     done
     #i=$((i-1)); continue
-    echo "--------------- ROtation of $HOST --------"
+    if [ $ERROR -gt 0 ]; then
+        echo "ERRORS encountered on host $HOST, skipping rotation"
+        i=$((i-1))
+        ERROR=0
+        continue
+    fi
+    if [ $ROTATE -eq 0 ]; then
+        echo "-------- No Rotation Selected ---------"
+        i=$((i-1))
+        continue
+    fi
+    exit
+    echo "--------------- Rotation of $HOST --------"
     # current day of week
     DOW=$(date +%u)
     [ $DOW -eq 3 ] && ROTATEWEEK=1 || ROTATEWEEK=0
