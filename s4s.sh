@@ -2,7 +2,17 @@
 set -f
 # include parse_yaml function
 APPDIR=`dirname $0`
-ROTATE=0
+LOCKFILE=$0".pid"
+ROTATE=1
+
+if [ -r $LOCKFILE ] && read pid <$LOCKFILE; then
+    echo "Found same process lock-file. Is another instance still running?"
+    echo "Please delete $LOCKFILE and rerun script"
+    echo "........ exiting"
+    exit 7
+fi
+echo 1> $LOCKFILE
+
 # YAML parser from:
 # https://gist.github.com/pkuczynski/8665367
 parse_yaml() {
@@ -52,7 +62,6 @@ while [  $i -gt 0 ]; do
         done
     fi
     echo "CNDEXCLUDE=$CMDEXCLUDE"
-
     if [ ! -d $DEST/$HOST/rsync.part ]; then
         mkdir -p $DEST/$HOST/rsync.part;
     else
@@ -63,7 +72,7 @@ while [  $i -gt 0 ]; do
     fi
     for DIR in $DIRS; do
         echo "-- Snapshotting $DIR"
-        $LOCAL_RSYNC -ahR --rsync-path=$REMOTE_RSYNC --stats $CMDEXCLUDE \
+        $LOCAL_RSYNC -ahRv --rsync-path=$REMOTE_RSYNC --stats $CMDEXCLUDE \
            --delete $LINK_DEST $RUSER@$HOST:$DIR $DEST/$HOST/rsync.part/
         [ $? -eq 0 ] || { echo "ERROR, trying next DIR"; ERROR=1; continue; }
     done
@@ -79,7 +88,7 @@ while [  $i -gt 0 ]; do
         i=$((i-1))
         continue
     fi
-    exit
+
     echo "--------------- Rotation of $HOST --------"
     # current day of week
     DOW=$(date +%u)
@@ -133,6 +142,7 @@ while [  $i -gt 0 ]; do
     fi
 
     j=$DAYS
+   [ $ROTATE ] || j=0 
     while [ $j -gt 0 ]; do
         ND=$((j-1))
         if [ -d $DEST/$HOST/day.$ND ]; then
@@ -144,3 +154,4 @@ while [  $i -gt 0 ]; do
     mv $DEST/$HOST/rsync.part $DEST/$HOST/day.0
 i=$((i-1))
 done
+rm $LOCKFILE
