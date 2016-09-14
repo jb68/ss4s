@@ -7,7 +7,7 @@ ROTATE=1
 
 if [ -r $LOCKFILE ] && read pid <$LOCKFILE; then
     echo "Found same process lock-file. Is another instance still running?"
-    echo "Please delete $LOCKFILE and rerun script"
+    echo "Please delete $LOCKFILE and re-run script"
     echo "........ exiting"
     exit 7
 fi
@@ -55,7 +55,13 @@ while [  $i -gt 0 ]; do
     eval EXCLUDES=\$conf_host${i}_excl
 
     echo "Snapshotting $HOST, dirs: $DIRS"
-    CMDEXCLUDE=''
+    if [ -d $DEST/$HOST/day.0 ]; then
+        if [ $(($(date +%s) - $(date -r $DEST/$HOST/day.0 +%s))) -le $((60*60*24)) ]; then
+            echo "Skipping $HOST, last snapshot newer than 1 day"
+            i=$((i-1))
+            continue
+        fi
+    fi
     if [ "$EXCLUDES" ]; then
         for EXCLUDE in $EXCLUDES; do
             CMDEXCLUDE="$CMDEXCLUDE --exclude=$EXCLUDE"
@@ -66,9 +72,6 @@ while [  $i -gt 0 ]; do
         mkdir -p $DEST/$HOST/rsync.part;
     else
         echo "Found unfinished snapshot... continue"
-    fi
-    if [ -d $DEST/$HOST/day.0 ]; then
-        LINK_DEST="--link-dest=$DEST/$HOST/day.0"
     fi
     for DIR in $DIRS; do
         echo "-- Snapshotting $DIR"
