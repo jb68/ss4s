@@ -2,7 +2,7 @@
 set -f
 # include parse_yaml function
 APPDIR=`dirname $0`
-LOCKFILE=$0".pid"
+LOCKFILE=${0%.*}".pid"
 ROTATE=1
 
 if [ -r $LOCKFILE ] && read pid <$LOCKFILE; then
