@@ -4,12 +4,19 @@ set -f
 APPDIR=`dirname $0`
 LOCKFILE=${0%.*}".pid"
 ROTATE=1
+# 1 day max age
+MAXAGE=$((60*60*24))
 
 if [ -r $LOCKFILE ] && read pid <$LOCKFILE; then
     echo "Found same process lock-file. Is another instance still running?"
-    echo "Please delete $LOCKFILE and re-run script"
-    echo "........ exiting"
-    exit 7
+    if [ $(($(date +%s) - $(date -r $LOCKFILE +%s))) -le $MAXAGE ]; then
+        echo "Please delete $LOCKFILE and re-run script"
+        echo "........ exiting"
+        exit 7
+    else
+        echo "$LOCKFILE is older than 1 day, deleted"
+        echo "........ continue"
+    fi
 fi
 echo 1> $LOCKFILE
 
@@ -57,7 +64,8 @@ while [  $i -gt 0 ]; do
     echo "Snapshotting $HOST, dirs: $DIRS"
     if [ -d $DEST/$HOST/day.0 ]; then
         LINK_DEST="--link-dest=$DEST/$HOST/day.0"
-        if [ $(($(date +%s) - $(date -r $DEST/$HOST/day.0 +%s))) -le $((60*60*24)) ]; then
+        if [ $(($(date +%s) - $(date -r $DEST/$HOST/day.0 +%s))) -le $MAXAGE ];
+            then
             echo "Skipping $HOST, last snapshot newer than 1 day"
             i=$((i-1))
             continue
