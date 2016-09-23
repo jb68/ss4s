@@ -56,11 +56,14 @@ while [  $i -gt 0 ]; do
 
     echo "Snapshotting $HOST, dirs: $DIRS"
     if [ -d $DEST/$HOST/day.0 ]; then
+        LINK_DEST="--link-dest=$DEST/$HOST/day.0"
         if [ $(($(date +%s) - $(date -r $DEST/$HOST/day.0 +%s))) -le $((60*60*24)) ]; then
             echo "Skipping $HOST, last snapshot newer than 1 day"
             i=$((i-1))
             continue
         fi
+    else
+        LINK_DEST=""
     fi
     if [ "$EXCLUDES" ]; then
         for EXCLUDE in $EXCLUDES; do
