@@ -3,6 +3,7 @@ set -f
 # include parse_yaml function
 APPDIR=`dirname $0`
 LOCKFILE=${0%.*}".pid"
+CONFIG=${1:-"config.yml"}
 ROTATE=1
 # 1 day max age
 MAXAGE=$((60*60*24))
@@ -40,7 +41,7 @@ parse_yaml() {
 }
 
 # load config
-eval $(parse_yaml $APPDIR/config.yml "conf_")
+eval $(parse_yaml $APPDIR/$CONFIG "conf_")
 
 # Backup directory
 DEST=$conf_global_destDir
