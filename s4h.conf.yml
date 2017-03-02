@@ -1,0 +1,13 @@
+local:
+  retDays: 7
+  retWeeks: 4
+  retMonths: 6
+  destDir: /export/backup/home/
+  rsync: /usr/bin/rsync
+
+host:
+  name: a.dddd.com
+  user: root
+  rsync: /usr/bin/rsync
+  homedir: /export/home
+  excl: .*
