@@ -2,7 +2,7 @@ local:
   retDays: 7
   retWeeks: 4
   retMonths: 6
-  destDir: /export/backup/home/
+  destDir: /export/backup/home
   rsync: /usr/bin/rsync
 
 host:

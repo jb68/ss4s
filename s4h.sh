@@ -59,6 +59,16 @@ SRC=$conf_host_src
 RUSER=$conf_host_user
 EXCLUDES=$conf_host_excl
 
+# Check 4 rsync
+if [ ! -x $LOCAL_RSYNC ]; then
+    echo "Cannot find rsync locally.  Aborting."
+    exit 1
+fi
+
+if [ $REMOTE_RSYNC != $(ssh $HOST ls $REMOTE_RSYNC) ]; then
+    echo "Cannot find rsync remotely.  Aborting."
+    exit 1
+fi
 if [ "$EXCLUDES" ]; then
     for EXCLUDE in $EXCLUDES; do
         CMDEXCLUDE="$CMDEXCLUDE --exclude=$EXCLUDE"
@@ -69,14 +79,13 @@ echo "CNDEXCLUDE=$CMDEXCLUDE"
 # Grab usernames from HOST
 USERS=$(ssh $HOST ls $HOMEDIR)
 for USER in $USERS; do
+    ERROR=0
     echo "Creating snapshot for $USER"
-
     if [ -d $DEST/$USER/day.0 ]; then
         LINK_DEST="--link-dest=$DEST/$USER/day.0"
         if [ $(($(date +%s) - $(date -r $DEST/$USER/day.0 +%s))) -le $MAXAGE ];
             then
             echo "Skipping $USER, last snapshot newer than 1 day"
-            i=$((i-1))
             continue
         fi
     else
@@ -89,21 +98,18 @@ for USER in $USERS; do
         echo "Found unfinished snapshot... continue"
     fi
 
-        echo "-- Snapshotting $USER"
-        $LOCAL_RSYNC -ahRv --rsync-path=$REMOTE_RSYNC --stats $CMDEXCLUDE \
-           --delete $LINK_DEST $RUSER@$HOST:$HOMEDIR $DEST/$USER/rsync.part/
-        [ $? -eq 0 ] || { echo "ERROR, trying next $USER"; ERROR=1; }
+    echo "-- Snapshotting $USER"
+    echo "$LOCAL_RSYNC -ahv --rsync-path=$REMOTE_RSYNC --stats $CMDEXCLUDE \
+           --delete $LINK_DEST $RUSER@$HOST:$HOMEDIR/$USER/ $DEST/$USER/rsync.part/"
+    [ $? -eq 0 ] || { echo "ERROR, trying next $USER"; ERROR=1; }
 
-    #i=$((i-1)); continue
     if [ $ERROR -gt 0 ]; then
         echo "ERRORS encountered on user $USER, skipping rotation"
-        i=$((i-1))
         ERROR=0
         continue
     fi
     if [ $ROTATE -eq 0 ]; then
         echo "-------- No Rotation Selected ---------"
-        i=$((i-1))
         continue
     fi
 
