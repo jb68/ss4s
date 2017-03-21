@@ -51,16 +51,30 @@ REMOTE_RSYNC=$conf_global_rsyncRemote
 DAYS=$conf_global_retDays
 WEEKS=$conf_global_retWeeks
 MONTHS=$conf_global_retMonths
+ERRORS=""
+ERROR=0
+
+if [ ! -x $LOCAL_RSYNC ]; then
+    echo "Cannot find local rsync program. ${0%.*} depend on it to function"
+    echo "########## Please insta rsync and rerun ${0%.*} #################"
+    exit 1
+fi
+
 echo "Retention Policy (dd/ww/mm) $DAYS/$WEEKS/$MONTHS"
 
 # check structure
 i=$((conf_length-1))
 while [  $i -gt 0 ]; do
-    eval HOST=\$conf_host${i}_name
+    eval HOST=\$conf_host${i}_fqdn
     eval DIRS=\$conf_host${i}_dirs
     eval SRC=\$conf_host${i}_src
     eval RUSER=\$conf_host${i}_user
     eval EXCLUDES=\$conf_host${i}_excl
+    eval ALIAS=\$conf_host${i}_alias
+    eval RRSYNC=\$conf_host${i}_rsync
+    if [ "$RRSYNC" != "" ]; then
+        REMOTE_RSYNC=$RRSYNC
+    fi
 
     echo "Snapshotting $HOST, dirs: $DIRS"
     if [ -d $DEST/$HOST/day.0 ]; then
@@ -87,13 +101,18 @@ while [  $i -gt 0 ]; do
     fi
     for DIR in $DIRS; do
         echo "-- Snapshotting $DIR"
-        $LOCAL_RSYNC -ahRv --rsync-path=$REMOTE_RSYNC --stats $CMDEXCLUDE \
-           --delete $LINK_DEST $RUSER@$HOST:$DIR $DEST/$HOST/rsync.part/
-        [ $? -eq 0 ] || { echo "ERROR, trying next DIR"; ERROR=1; continue; }
+        RES=$( $LOCAL_RSYNC -ahR --rsync-path=$REMOTE_RSYNC --stats $CMDEXCLUDE \
+           --delete $LINK_DEST $RUSER@$HOST:$DIR $DEST/$HOST/rsync.part/ 2>&1 ) 
+        #echo "exit: $? ,error is $RES"
+        [ $? -eq 0 ] || { echo $RES; ERROR=1;
+                          ERRORS+="ERROR on host $HOST: $RES";                  
+                          echo "ERROR, trying next DIR"; continue; }
+        echo $RES
     done
     #i=$((i-1)); continue
     if [ $ERROR -gt 0 ]; then
         echo "ERRORS encountered on host $HOST, skipping rotation"
+        
         i=$((i-1))
         ERROR=0
         continue
@@ -169,4 +188,9 @@ while [  $i -gt 0 ]; do
     mv $DEST/$HOST/rsync.part $DEST/$HOST/day.0
 i=$((i-1))
 done
+if [ ! -z "$ERRORS" ]; then
+    echo "--------------------------------------------------------------"
+    echo $ERRORS
+    echo "--------------------------------------------------------------"
+fi
 rm $LOCKFILE

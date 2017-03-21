@@ -7,13 +7,15 @@ global:
   rsyncLocal: /usr/bin/rsync
 
 host1:
-  name: a.dddd.com
+  alias: Some Name
+  fqdn: a.dddd.com
   user: root
   dirs: /home /var/www/html /etc
   excl: /etc/webmin/system-status/ dovecot.index*
   
 host2:
-  name: d.dddd.com
+  alias: Other Name
+  fqdn: 192.168.0.0
   user: root
   dirs: /home /var/www/html /etc /var/spool/mail
   excl: .*/ /etc/webmin/system-status/
