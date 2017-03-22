@@ -47,7 +47,6 @@ eval $(parse_yaml $APPDIR/$CONFIG "conf_")
 DEST=$conf_global_destDir
 # rsync path
 LOCAL_RSYNC=$conf_global_rsyncLocal
-REMOTE_RSYNC=$conf_global_rsyncRemote
 DAYS=$conf_global_retDays
 WEEKS=$conf_global_retWeeks
 MONTHS=$conf_global_retMonths
@@ -72,8 +71,12 @@ while [  $i -gt 0 ]; do
     eval EXCLUDES=\$conf_host${i}_excl
     eval ALIAS=\$conf_host${i}_alias
     eval RRSYNC=\$conf_host${i}_rsync
-    if [ "$RRSYNC" != "" ]; then
-        REMOTE_RSYNC=$RRSYNC
+
+    [ -z "$HOST" ] && { ERRORS+="ERROR: Host number mismach, check config"; }
+    if [ -z "$RRSYNC" ]; then
+        REMOTE_RSYNC=$conf_global_rsyncRemote
+    else
+        REMOTE_RSYNC=$RRSYNC;
     fi
 
     echo "Snapshotting $HOST, dirs: $DIRS"
