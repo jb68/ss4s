@@ -55,10 +55,9 @@ ERROR=0
 
 if [ ! -x $LOCAL_RSYNC ]; then
     echo "Cannot find local rsync program. ${0%.*} depend on it to function"
-    echo "########## Please insta rsync and rerun ${0%.*} #################"
+    echo "##########  Please install rsync and re-run ${0%.*}    ##########"
     exit 1
 fi
-
 echo "Retention Policy (dd/ww/mm) $DAYS/$WEEKS/$MONTHS"
 
 # check structure
@@ -167,8 +166,7 @@ while [  $i -gt 0 ]; do
                 mv -f $DEST/$HOST/week.$ND $DEST/$HOST/week.$j
             fi
             j=$((j-1))
-         done
-
+        done
         if [ -d $DEST/$HOST/day.$DAYS ]; then
            echo "day.$DAYS --> week.0"
            mv $DEST/$HOST/day.$DAYS $DEST/$HOST/week.0
@@ -179,7 +177,7 @@ while [  $i -gt 0 ]; do
     fi
 
     j=$DAYS
-   [ $ROTATE ] || j=0 
+    [ $ROTATE ] || j=0 
     while [ $j -gt 0 ]; do
         ND=$((j-1))
         if [ -d $DEST/$HOST/day.$ND ]; then
