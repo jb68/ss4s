@@ -3,7 +3,7 @@ set -f
 # include parse_yaml function
 APPDIR=`dirname $0`
 LOCKFILE=${0%.*}".pid"
-CONFIG=${1:-"config.yml"}
+CONFIG=${1:-"s4s.conf.yml"}
 ROTATE=1
 # 1 day max age
 MAXAGE=$((60*60*24))
