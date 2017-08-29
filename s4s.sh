@@ -61,8 +61,8 @@ fi
 echo "Retention Policy (dd/ww/mm) $DAYS/$WEEKS/$MONTHS"
 
 # check structure
-i=$((conf_length-1))
-while [  $i -gt 0 ]; do
+HOSTSNo=$((conf_length-1))
+for i in `seq 1 $HOSTSNo`; do
     eval HOST=\$conf_host${i}_fqdn
     eval DIRS=\$conf_host${i}_dirs
     eval SRC=\$conf_host${i}_src
@@ -90,6 +90,8 @@ while [  $i -gt 0 ]; do
     else
         LINK_DEST=""
     fi
+
+	CMDEXCLUDE=''
     if [ "$EXCLUDES" ]; then
         for EXCLUDE in $EXCLUDES; do
             CMDEXCLUDE="$CMDEXCLUDE --exclude=$EXCLUDE"
@@ -104,24 +106,22 @@ while [  $i -gt 0 ]; do
     for DIR in $DIRS; do
         echo "-- Snapshotting $DIR"
         RES=$( $LOCAL_RSYNC -ahR --rsync-path=$REMOTE_RSYNC --stats $CMDEXCLUDE \
-           --delete $LINK_DEST $RUSER@$HOST:$DIR $DEST/$HOST/rsync.part/ 2>&1 ) 
-        #echo "exit: $? ,error is $RES"
+           --delete $LINK_DEST $RUSER@$HOST:$DIR $DEST/$HOST/rsync.part/ 2>&1 )
+
         [ $? -eq 0 ] || { echo $RES; ERROR=1;
                           ERRORS+="ERROR on host $HOST: $RES";                  
                           echo "ERROR, trying next DIR"; continue; }
         echo $RES
     done
-    #i=$((i-1)); continue
+
     if [ $ERROR -gt 0 ]; then
         echo "ERRORS encountered on host $HOST, skipping rotation"
-        
-        i=$((i-1))
+
         ERROR=0
         continue
     fi
     if [ $ROTATE -eq 0 ]; then
         echo "-------- No Rotation Selected ---------"
-        i=$((i-1))
         continue
     fi
 
@@ -187,7 +187,6 @@ while [  $i -gt 0 ]; do
         j=$((j-1))
     done
     mv $DEST/$HOST/rsync.part $DEST/$HOST/day.0
-i=$((i-1))
 done
 if [ ! -z "$ERRORS" ]; then
     echo "--------------------------------------------------------------"
