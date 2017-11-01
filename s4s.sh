@@ -6,7 +6,7 @@ LOCKFILE=${0%.*}".pid"
 CONFIG=${1:-"s4s.conf.yml"}
 ROTATE=1
 # 1 day max age
-MAXAGE=$((60*60*24))
+MAXAGE=$((60*60*20))
 
 if [ -r $LOCKFILE ] && read pid <$LOCKFILE; then
     echo "Found same process lock-file. Is another instance still running?"
