@@ -8,7 +8,7 @@ ROTATE=1
 # 1 day max age
 MAXAGE=$((60*60*20))
 
-if [ -r $LOCKFILE ] && read pid <$LOCKFILE; then
+if [ -r $LOCKFILE ] && read PID <$LOCKFILE &&  ps -p $PID; then
     echo "Found same process lock-file. Is another instance still running?"
     if [ $(($(date +%s) - $(date -r $LOCKFILE +%s))) -le $MAXAGE ]; then
         echo "Please delete $LOCKFILE and re-run script"
@@ -19,7 +19,7 @@ if [ -r $LOCKFILE ] && read pid <$LOCKFILE; then
         echo "........ continue"
     fi
 fi
-echo 1> $LOCKFILE
+echo $$ > $LOCKFILE
 
 # YAML parser from:
 # https://gist.github.com/pkuczynski/8665367
