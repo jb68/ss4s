@@ -2,10 +2,10 @@ version: 2
 jobs:
   build:
     docker:
-      - image: koalaman/shellcheck:stable
+      - image: koalaman/shellcheck-alpine:stable
         environment:
           SHELLCHECK_OPTS: "-e SC2086 -e SC2006 -e SC2154  -e SC2162 -e SC3043 -e SC2236 -e SC3024 -e SC2181 -e SC2046 -e SC2155 -e SC2126 -e SC2034"
-        entrypoint: "/bin/bash"
+        entrypoint: "/bin/sh"
     steps:
      - checkout
      - run:
