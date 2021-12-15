@@ -1,7 +1,7 @@
 #!/bin/sh
 set -f
 # include parse_yaml function
-APPDIR=`dirname $0`
+APPDIR=$(dirname $0)
 LOCKFILE=${0%.*}".pid"
 CONFIG=${1:-"s4s.conf.yml"}
 ROTATE=1
@@ -62,7 +62,7 @@ echo "Retention Policy (dd/ww/mm) $DAYS/$WEEKS/$MONTHS"
 
 # check structure
 HOSTSNo=$((conf_length-1))
-for i in `seq 1 $HOSTSNo`; do
+for i in $(seq 1 $HOSTSNo); do
     eval HOST=\$conf_host${i}_fqdn
     eval DIRS=\$conf_host${i}_dirs
     eval SRC=\$conf_host${i}_src
