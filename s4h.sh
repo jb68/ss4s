@@ -1,7 +1,7 @@
 #!/bin/sh
 set -f
 # include parse_yaml function
-APPDIR=`dirname $0`
+APPDIR=$(dirname $0)
 LOCKFILE=${0%.*}".pid"
 CONFIG=${1:-"s4h.conf.yml"}
 ROTATE=1
