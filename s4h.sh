@@ -44,20 +44,22 @@ parse_yaml() {
 eval $(parse_yaml $APPDIR/$CONFIG "conf_")
 
 # Backup directory
-DEST=$conf_local_destDir
-# rsync path
-LOCAL_RSYNC=$conf_local_rsync
-REMOTE_RSYNC=$conf_host_rsync
-DAYS=$conf_local_retDays
-WEEKS=$conf_local_retWeeks
-MONTHS=$conf_local_retMonths
-echo "Retention Policy (dd/ww/mm) $DAYS/$WEEKS/$MONTHS"
+# shellcheck disable=SC2154
+{
+    DEST=$conf_local_destDir
+    # rsync path
+    LOCAL_RSYNC=$conf_local_rsync
+    REMOTE_RSYNC=$conf_host_rsync
+    DAYS=$conf_local_retDays
+    WEEKS=$conf_local_retWeeks
+    MONTHS=$conf_local_retMonths
+    echo "Retention Policy (dd/ww/mm) $DAYS/$WEEKS/$MONTHS"
 
-HOST=$conf_host_name
-HOMEDIR=$conf_host_homedir
-SRC=$conf_host_src
-RUSER=$conf_host_user
-EXCLUDES=$conf_host_excl
+    HOST=$conf_host_name
+    HOMEDIR=$conf_host_homedir
+    RUSER=$conf_host_user
+    EXCLUDES=$conf_host_excl
+}
 
 # Check 4 rsync
 if [ ! -x $LOCAL_RSYNC ]; then
