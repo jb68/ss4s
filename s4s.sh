@@ -43,15 +43,18 @@ parse_yaml() {
 # load config
 eval $(parse_yaml $APPDIR/$CONFIG "conf_")
 
-# Backup directory
-DEST=$conf_global_destDir
-# rsync path
-LOCAL_RSYNC=$conf_global_rsyncLocal
-DAYS=$conf_global_retDays
-WEEKS=$conf_global_retWeeks
-MONTHS=$conf_global_retMonths
-ERRORS=""
-ERROR=0
+# shellcheck disable=SC2154
+{
+    # Backup directory
+    DEST=$conf_global_destDir
+    # rsync path
+    LOCAL_RSYNC=$conf_global_rsyncLocal
+    DAYS=$conf_global_retDays
+    WEEKS=$conf_global_retWeeks
+    MONTHS=$conf_global_retMonths
+    ERRORS=""
+    ERROR=0
+}
 
 if [ ! -x $LOCAL_RSYNC ]; then
     echo "Cannot find local rsync program. ${0%.*} depend on it to function"
@@ -61,6 +64,7 @@ fi
 echo "Retention Policy (dd/ww/mm) $DAYS/$WEEKS/$MONTHS"
 
 # check structure
+# shellcheck disable=SC2154
 HOSTSNo=$((conf_length-1))
 for i in $(seq 1 $HOSTSNo); do
     eval HOST=\$conf_host${i}_fqdn
@@ -73,6 +77,7 @@ for i in $(seq 1 $HOSTSNo); do
 
     [ -z "$HOST" ] && { ERRORS+="ERROR: Host number mismach, check config"; }
     if [ -z "$RRSYNC" ]; then
+        # shellcheck disable=SC2154
         REMOTE_RSYNC=$conf_global_rsyncRemote
     else
         REMOTE_RSYNC=$RRSYNC;
